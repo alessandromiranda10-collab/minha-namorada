@@ -1,7 +1,18 @@
-UGGINGFACE_TOKEN = "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"
-MODEL_CHAT = "gpt2"  # ou qualquer modelo Hugging Face de chat
-MODEL_TTS = "facebook/tts_transformer-es-css10"  # exemplo de TTS em espanhol/inglês
-AVATAR_URL = "https://i.imgur.com/4AiXzf8.png"  # link de avatar
+import requests
+import webbrowser
+import tempfile
+
+# ================= CONFIGURAÇÃO =================
+HUGGINGFACE_TOKEN = "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"
+
+# Modelo de chat
+MODEL_CHAT = "gpt2"  # ou qualquer modelo de chat no Hugging Face
+
+# Modelo TTS
+MODEL_TTS = "facebook/tts_transformer-es-css10"  # modelo de TTS Hugging Face
+
+# Avatar direto do GitHub (exemplo)
+AVATAR_URL = "https://raw.githubusercontent.com/username/repo/main/avatar.png"
 
 # ================= FUNÇÃO CHAT =================
 def ask_ai(prompt):
@@ -13,6 +24,9 @@ def ask_ai(prompt):
         json=payload
     )
     result = response.json()
+    # Alguns modelos retornam {'error': ...} se estiver sobrecarregado
+    if isinstance(result, dict) and "error" in result:
+        return "Ops, o modelo não respondeu. Tente novamente."
     return result[0]['generated_text'].replace(prompt, "").strip()
 
 # ================= FUNÇÃO TTS =================
@@ -24,16 +38,21 @@ def speak(text):
         headers=headers,
         json=payload
     )
-    # Salva o áudio temporariamente e toca no browser
+    # Salva o áudio temporariamente e abre no browser
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
         f.write(response.content)
         webbrowser.open(f.name)
 
-# ================= INTERAÇÃO =================
+# ================= INÍCIO DA CONVERSA =================
 print(f"Avatar da sua namorada IA: {AVATAR_URL}\n")
+print("Você pode abrir o link acima para ver seu avatar.\n")
 
 while True:
     user_input = input("Você: ")
+    if user_input.lower() in ["sair", "exit", "quit"]:
+        print("Encerrando a conversa...")
+        break
+
     ai_response = ask_ai(user_input)
-    print(f"IA: {ai_response}")
+    print(f"IA: {ai_response}\n")
     speak(ai_response)
