@@ -1,29 +1,15 @@
+import requests
 import webbrowser
+import tempfile
 
 # ================= CONFIGURAÇÃO =================
-HUGGINGFACE_TOKEN = "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"
-MODEL_CHAT = "gpt2"  # Modelo de exemplo
+HUGGINGFACE_TOKEN = "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"  # Coloque seu token Hugging Face
+MODEL_CHAT = "gpt2"  # Modelo de chat
+MODEL_TTS = "espnet/kan-bayashi_ljspeech_vits"  # Exemplo de TTS
 AVATAR_URL = "https://raw.githubusercontent.com/username/repo/main/avatar.png"
 
-# ================= FUNÇÃO CHAT SIMULADA =================
-# Sem requests, usamos simulação de resposta
+# ================= FUNÇÃO CHAT =================
 def ask_ai(prompt):
-    # Aqui seria a chamada real à API Hugging Face
-    # Mas sem requests, só devolvemos algo genérico
-    return f"Eu li sua mensagem: '{prompt}'. Vamos conversar mais!"
-
-# ================= INÍCIO DA CONVERSA =================
-print("Avatar da sua namorada IA:")
-print(AVATAR_URL)
-print("Você pode abrir o link acima no navegador para ver o avatar.\n")
-
-webbrowser.open(AVATAR_URL)  # abre automaticamente o avatar
-
-while True:
-    user_input = input("Você: ")
-    if user_input.lower() in ["sair", "exit", "quit"]:
-        print("Encerrando a conversa...")
-        break
-
-    ai_response = ask_ai(user_input)
-    print(f"IA: {ai_response}\n")
+    headers = {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
+    payload = {"inputs": prompt}
+    response = requests
