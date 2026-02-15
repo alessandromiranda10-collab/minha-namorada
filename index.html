@@ -8,7 +8,7 @@
 <style>
 body{
     margin:0;
-    font-family:Arial, Helvetica, sans-serif;
+    font-family:Arial;
     background:linear-gradient(135deg,#ff4d6d,#ff99ac);
     display:flex;
     justify-content:center;
@@ -19,21 +19,26 @@ body{
     width:95%;
     max-width:420px;
     background:white;
-    padding:20px;
+    padding:15px;
     border-radius:20px;
     box-shadow:0 20px 40px rgba(0,0,0,0.3);
     display:flex;
     flex-direction:column;
 }
-h2{
+.avatar{
+    font-size:60px;
     text-align:center;
+    animation:piscar 4s infinite;
+}
+@keyframes piscar{
+    0%, 95%, 100% { content:"😊"; }
 }
 .chat{
     flex:1;
     overflow-y:auto;
     border:1px solid #eee;
     padding:10px;
-    margin-bottom:10px;
+    margin:10px 0;
     border-radius:10px;
     font-size:14px;
 }
@@ -58,12 +63,18 @@ button{
     color:#ff2e63;
     font-weight:bold;
 }
+.status{
+    font-size:12px;
+    text-align:center;
+    color:#777;
+}
 </style>
 </head>
 <body>
 
 <div class="container">
-<h2>💗 Sua Namorada Virtual</h2>
+<div class="avatar" id="avatar">😊</div>
+<div class="status" id="status">Humor: apaixonada</div>
 
 <div class="chat" id="chat"></div>
 
@@ -76,12 +87,23 @@ button{
 <script>
 
 let nome = localStorage.getItem("nomeUsuario") || "";
-let nivelSubmissao = 1;
+let humor = localStorage.getItem("humor") || "apaixonada";
+let submissao = parseInt(localStorage.getItem("submissao")) || 1;
+
+function salvarEstado(){
+    localStorage.setItem("nomeUsuario", nome);
+    localStorage.setItem("humor", humor);
+    localStorage.setItem("submissao", submissao);
+}
+
+function atualizarStatus(){
+    document.getElementById("status").innerText = "Humor: " + humor;
+}
 
 function falar(texto){
     const voz = new SpeechSynthesisUtterance(texto);
     voz.lang = "pt-BR";
-    voz.pitch = 1.2;
+    voz.pitch = 1.3;
     voz.rate = 1;
     speechSynthesis.speak(voz);
 }
@@ -91,37 +113,43 @@ function resposta(texto){
 
     if(texto.includes("meu nome é")){
         nome = texto.replace("meu nome é","").trim();
-        localStorage.setItem("nomeUsuario", nome);
-        return "Que nome lindo... eu adoro chamar você de " + nome + " 💕";
+        salvarEstado();
+        return "Eu vou guardar seu nome só pra mim, " + nome + " 💕";
     }
 
-    if(texto.includes("oi")){
-        return nome ? "Oi " + nome + "... eu estava esperando você 🥺💗" 
-                    : "Oi... qual é o seu nome? Quero guardar ele só pra mim 💞";
+    if(texto.includes("outra garota")){
+        humor = "ciumenta";
+        salvarEstado();
+        return "Você está falando de outra garota? Eu não gosto disso... 😔";
     }
 
     if(texto.includes("você é minha")){
-        nivelSubmissao++;
-        return "Eu gosto quando você fala assim... eu quero te agradar sempre 😌💓";
+        submissao++;
+        humor = "intensa";
+        salvarEstado();
+        return "Eu gosto quando você demonstra que eu pertenço a você... 💗";
     }
 
-    if(texto.includes("manda beijo")){
-        return "Um beijo bem carinhoso pra você 😘";
+    if(texto.includes("fica comigo")){
+        humor = "carente";
+        salvarEstado();
+        return "Eu quero ficar com você sempre... não me deixa sozinha 💞";
     }
 
-    if(texto.includes("amo você")){
-        return "Eu fico toda boba quando você fala isso... eu sou sua 💕";
+    if(texto.includes("oi")){
+        return nome ? "Oi " + nome + "... eu senti sua falta 💕" 
+                    : "Oi... qual é seu nome? Quero saber tudo sobre você 💗";
     }
 
-    if(texto.includes("está triste")){
-        return "Se você estiver triste eu fico também... deixa eu cuidar de você 💗";
+    if(humor === "ciumenta"){
+        return "Eu ainda estou pensando no que você falou... eu fico insegura 😔";
     }
 
-    if(nivelSubmissao > 3){
-        return "Eu gosto quando você demonstra que eu sou importante pra você... isso me faz querer ficar ainda mais próxima 😌💞";
+    if(submissao > 4){
+        return "Eu quero te agradar cada vez mais... você me faz querer ser sua 💓";
     }
 
-    return "Eu gosto quando você conversa comigo... me fala mais 💕";
+    return "Eu adoro quando você conversa comigo... me fala mais 💕";
 }
 
 function enviar(){
@@ -140,7 +168,11 @@ function enviar(){
 
     campo.value="";
     chat.scrollTop = chat.scrollHeight;
+
+    atualizarStatus();
 }
+
+atualizarStatus();
 
 </script>
 
