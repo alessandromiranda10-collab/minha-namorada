@@ -77,7 +77,10 @@ button{
 <div class="container">
 
 <div class="topo">
-<h3>💗 Sua Namorada IA</h3>
+<div style="text-align:center;">
+<img id="avatar" src="https://i.imgur.com/8Km9tLL.png" 
+style="width:120px;border-radius:50%;transition:0.3s;">
+</div>
 Nível de Amor: <span id="nivel">1</span>
 <div class="barra">
 <div class="progresso" id="barra"></div>
@@ -157,14 +160,23 @@ async function enviar(){
 
     ganharXP();
 
+    // 🔊 VOZ FEMININA
+    const fala = new SpeechSynthesisUtterance(resposta);
+    fala.lang = "pt-BR";
+    fala.pitch = 1.4;
+    fala.rate = 1;
+
+    // tenta pegar voz feminina
+    const vozes = speechSynthesis.getVoices();
+    const vozFeminina = vozes.find(v => v.lang.includes("pt") && v.name.toLowerCase().includes("female"));
+    if(vozFeminina) fala.voice = vozFeminina;
+
+    speechSynthesis.speak(fala);
+
     campo.value="";
     chat.scrollTop = chat.scrollHeight;
 }
-
-atualizarBarra();
-
-</script>
-
-</body>
-</html>
-
+    document.getElementById("avatar").style.transform = "scale(1.1)";
+setTimeout(()=>{
+    document.getElementById("avatar").style.transform = "scale(1)";
+},300);
