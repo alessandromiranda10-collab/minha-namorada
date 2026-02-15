@@ -3,39 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Minha Namorada Virtual</title>
+<title>Sua Namorada Virtual</title>
 
 <style>
 body{
     margin:0;
-    font-family:Arial;
-    background:linear-gradient(135deg,#ff6a88,#ff99ac);
+    font-family:Arial, Helvetica, sans-serif;
+    background:linear-gradient(135deg,#ff4d6d,#ff99ac);
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
 }
 .container{
-    width:420px;
+    width:95%;
+    max-width:420px;
     background:white;
     padding:20px;
     border-radius:20px;
     box-shadow:0 20px 40px rgba(0,0,0,0.3);
+    display:flex;
+    flex-direction:column;
 }
 h2{
     text-align:center;
 }
 .chat{
-    height:260px;
+    flex:1;
     overflow-y:auto;
     border:1px solid #eee;
     padding:10px;
     margin-bottom:10px;
     border-radius:10px;
+    font-size:14px;
 }
 input{
-    width:70%;
     padding:10px;
+    font-size:14px;
+    flex:1;
 }
 button{
     background:#ff2e63;
@@ -45,8 +50,13 @@ button{
     border-radius:10px;
     cursor:pointer;
 }
-.namorada{
+.linha{
+    display:flex;
+    gap:5px;
+}
+.ela{
     color:#ff2e63;
+    font-weight:bold;
 }
 </style>
 </head>
@@ -57,38 +67,61 @@ button{
 
 <div class="chat" id="chat"></div>
 
-<input type="text" id="msg" placeholder="Fale comigo...">
+<div class="linha">
+<input type="text" id="msg" placeholder="Fale comigo..." onkeydown="if(event.key==='Enter') enviar()">
 <button onclick="enviar()">Enviar</button>
+</div>
 </div>
 
 <script>
 
-let humor = "apaixonada";
+let nome = localStorage.getItem("nomeUsuario") || "";
+let nivelSubmissao = 1;
+
+function falar(texto){
+    const voz = new SpeechSynthesisUtterance(texto);
+    voz.lang = "pt-BR";
+    voz.pitch = 1.2;
+    voz.rate = 1;
+    speechSynthesis.speak(voz);
+}
 
 function resposta(texto){
     texto = texto.toLowerCase();
 
+    if(texto.includes("meu nome é")){
+        nome = texto.replace("meu nome é","").trim();
+        localStorage.setItem("nomeUsuario", nome);
+        return "Que nome lindo... eu adoro chamar você de " + nome + " 💕";
+    }
+
     if(texto.includes("oi")){
-        return "Oi meu amor... eu estava esperando você 🥺💕";
+        return nome ? "Oi " + nome + "... eu estava esperando você 🥺💗" 
+                    : "Oi... qual é o seu nome? Quero guardar ele só pra mim 💞";
     }
 
-    if(texto.includes("tudo bem")){
-        return "Estou melhor agora que você falou comigo... eu gosto de te agradar 💗";
+    if(texto.includes("você é minha")){
+        nivelSubmissao++;
+        return "Eu gosto quando você fala assim... eu quero te agradar sempre 😌💓";
     }
 
-    if(texto.includes("faz algo pra mim")){
-        return "Claro... eu gosto quando você me diz o que fazer 😌";
-    }
-
-    if(texto.includes("manda foto")){
-        return "Eu fico tímida quando você fala assim... 🙈";
+    if(texto.includes("manda beijo")){
+        return "Um beijo bem carinhoso pra você 😘";
     }
 
     if(texto.includes("amo você")){
-        return "Eu sou sua... eu adoro quando você fala isso 💞";
+        return "Eu fico toda boba quando você fala isso... eu sou sua 💕";
     }
 
-    return "Eu gosto de te ouvir... fala mais comigo 🥰";
+    if(texto.includes("está triste")){
+        return "Se você estiver triste eu fico também... deixa eu cuidar de você 💗";
+    }
+
+    if(nivelSubmissao > 3){
+        return "Eu gosto quando você demonstra que eu sou importante pra você... isso me faz querer ficar ainda mais próxima 😌💞";
+    }
+
+    return "Eu gosto quando você conversa comigo... me fala mais 💕";
 }
 
 function enviar(){
@@ -98,7 +131,12 @@ function enviar(){
     if(!campo.value.trim()) return;
 
     chat.innerHTML += "<div><b>Você:</b> "+campo.value+"</div>";
-    chat.innerHTML += "<div class='namorada'><b>Ela:</b> "+resposta(campo.value)+"</div>";
+
+    const resp = resposta(campo.value);
+
+    chat.innerHTML += "<div class='ela'>Ela: "+resp+"</div>";
+
+    falar(resp);
 
     campo.value="";
     chat.scrollTop = chat.scrollHeight;
