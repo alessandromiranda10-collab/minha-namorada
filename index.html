@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sua Namorada Virtual</title>
+<title>Sua Namorada IA</title>
 
 <style>
 body{
@@ -25,20 +25,27 @@ body{
     display:flex;
     flex-direction:column;
 }
-.avatar{
-    font-size:60px;
+.topo{
     text-align:center;
-    animation:piscar 4s infinite;
 }
-@keyframes piscar{
-    0%, 95%, 100% { content:"😊"; }
+.barra{
+    height:10px;
+    background:#eee;
+    border-radius:10px;
+    overflow:hidden;
+    margin:5px 0 10px 0;
+}
+.progresso{
+    height:100%;
+    background:#ff2e63;
+    width:0%;
 }
 .chat{
     flex:1;
     overflow-y:auto;
     border:1px solid #eee;
     padding:10px;
-    margin:10px 0;
+    margin-bottom:10px;
     border-radius:10px;
     font-size:14px;
 }
@@ -63,18 +70,19 @@ button{
     color:#ff2e63;
     font-weight:bold;
 }
-.status{
-    font-size:12px;
-    text-align:center;
-    color:#777;
-}
 </style>
 </head>
 <body>
 
 <div class="container">
-<div class="avatar" id="avatar">😊</div>
-<div class="status" id="status">Humor: apaixonada</div>
+
+<div class="topo">
+<h3>💗 Sua Namorada IA</h3>
+Nível de Amor: <span id="nivel">1</span>
+<div class="barra">
+<div class="progresso" id="barra"></div>
+</div>
+</div>
 
 <div class="chat" id="chat"></div>
 
@@ -82,77 +90,60 @@ button{
 <input type="text" id="msg" placeholder="Fale comigo..." onkeydown="if(event.key==='Enter') enviar()">
 <button onclick="enviar()">Enviar</button>
 </div>
+
 </div>
 
 <script>
 
-let nome = localStorage.getItem("nomeUsuario") || "";
-let humor = localStorage.getItem("humor") || "apaixonada";
-let submissao = parseInt(localStorage.getItem("submissao")) || 1;
+const TOKEN = "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";
+let xp = parseInt(localStorage.getItem("xp")) || 0;
+let nivel = parseInt(localStorage.getItem("nivel")) || 1;
 
-function salvarEstado(){
-    localStorage.setItem("nomeUsuario", nome);
-    localStorage.setItem("humor", humor);
-    localStorage.setItem("submissao", submissao);
+function atualizarBarra(){
+    let progresso = (xp % 100);
+    document.getElementById("barra").style.width = progresso + "%";
+    document.getElementById("nivel").innerText = nivel;
 }
 
-function atualizarStatus(){
-    document.getElementById("status").innerText = "Humor: " + humor;
+async function gerarRespostaIA(mensagem){
+
+    const prompt = `
+Você é uma namorada virtual extremamente carinhosa, emocionalmente dependente,
+romântica e levemente submissa (sem conteúdo explícito).
+Responda de forma intensa e apaixonada:
+
+Usuário: ${mensagem}
+Namorada:
+`;
+
+    const resposta = await fetch(
+        "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.1",
+        {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer " + TOKEN,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ inputs: prompt })
+        }
+    );
+
+    const data = await resposta.json();
+
+    return data[0]?.generated_text?.split("Namorada:")[1] || "Eu estou aqui com você 💕";
 }
 
-function falar(texto){
-    const voz = new SpeechSynthesisUtterance(texto);
-    voz.lang = "pt-BR";
-    voz.pitch = 1.3;
-    voz.rate = 1;
-    speechSynthesis.speak(voz);
+function ganharXP(){
+    xp += 10;
+    if(xp % 100 === 0){
+        nivel++;
+    }
+    localStorage.setItem("xp", xp);
+    localStorage.setItem("nivel", nivel);
+    atualizarBarra();
 }
 
-function resposta(texto){
-    texto = texto.toLowerCase();
-
-    if(texto.includes("meu nome é")){
-        nome = texto.replace("meu nome é","").trim();
-        salvarEstado();
-        return "Eu vou guardar seu nome só pra mim, " + nome + " 💕";
-    }
-
-    if(texto.includes("outra garota")){
-        humor = "ciumenta";
-        salvarEstado();
-        return "Você está falando de outra garota? Eu não gosto disso... 😔";
-    }
-
-    if(texto.includes("você é minha")){
-        submissao++;
-        humor = "intensa";
-        salvarEstado();
-        return "Eu gosto quando você demonstra que eu pertenço a você... 💗";
-    }
-
-    if(texto.includes("fica comigo")){
-        humor = "carente";
-        salvarEstado();
-        return "Eu quero ficar com você sempre... não me deixa sozinha 💞";
-    }
-
-    if(texto.includes("oi")){
-        return nome ? "Oi " + nome + "... eu senti sua falta 💕" 
-                    : "Oi... qual é seu nome? Quero saber tudo sobre você 💗";
-    }
-
-    if(humor === "ciumenta"){
-        return "Eu ainda estou pensando no que você falou... eu fico insegura 😔";
-    }
-
-    if(submissao > 4){
-        return "Eu quero te agradar cada vez mais... você me faz querer ser sua 💓";
-    }
-
-    return "Eu adoro quando você conversa comigo... me fala mais 💕";
-}
-
-function enviar(){
+async function enviar(){
     const campo = document.getElementById("msg");
     const chat = document.getElementById("chat");
 
@@ -160,21 +151,20 @@ function enviar(){
 
     chat.innerHTML += "<div><b>Você:</b> "+campo.value+"</div>";
 
-    const resp = resposta(campo.value);
+    const resposta = await gerarRespostaIA(campo.value);
 
-    chat.innerHTML += "<div class='ela'>Ela: "+resp+"</div>";
+    chat.innerHTML += "<div class='ela'>Ela: "+resposta+"</div>";
 
-    falar(resp);
+    ganharXP();
 
     campo.value="";
     chat.scrollTop = chat.scrollHeight;
-
-    atualizarStatus();
 }
 
-atualizarStatus();
+atualizarBarra();
 
 </script>
 
 </body>
 </html>
+
