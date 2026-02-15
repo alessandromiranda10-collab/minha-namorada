@@ -1,51 +1,23 @@
-import requests
 import webbrowser
-import tempfile
 
 # ================= CONFIGURAÇÃO =================
 HUGGINGFACE_TOKEN = "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"
-
-# Modelo de chat
-MODEL_CHAT = "gpt2"  # ou qualquer modelo de chat no Hugging Face
-
-# Modelo TTS
-MODEL_TTS = "facebook/tts_transformer-es-css10"  # modelo de TTS Hugging Face
-
-# Avatar direto do GitHub (exemplo)
+MODEL_CHAT = "gpt2"  # Modelo de exemplo
 AVATAR_URL = "https://raw.githubusercontent.com/username/repo/main/avatar.png"
 
-# ================= FUNÇÃO CHAT =================
+# ================= FUNÇÃO CHAT SIMULADA =================
+# Sem requests, usamos simulação de resposta
 def ask_ai(prompt):
-    headers = {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
-    payload = {"inputs": prompt, "options": {"use_cache": False}}
-    response = requests.post(
-        f"https://api-inference.huggingface.co/models/{MODEL_CHAT}",
-        headers=headers,
-        json=payload
-    )
-    result = response.json()
-    # Alguns modelos retornam {'error': ...} se estiver sobrecarregado
-    if isinstance(result, dict) and "error" in result:
-        return "Ops, o modelo não respondeu. Tente novamente."
-    return result[0]['generated_text'].replace(prompt, "").strip()
-
-# ================= FUNÇÃO TTS =================
-def speak(text):
-    headers = {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
-    payload = {"inputs": text}
-    response = requests.post(
-        f"https://api-inference.huggingface.co/models/{MODEL_TTS}",
-        headers=headers,
-        json=payload
-    )
-    # Salva o áudio temporariamente e abre no browser
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
-        f.write(response.content)
-        webbrowser.open(f.name)
+    # Aqui seria a chamada real à API Hugging Face
+    # Mas sem requests, só devolvemos algo genérico
+    return f"Eu li sua mensagem: '{prompt}'. Vamos conversar mais!"
 
 # ================= INÍCIO DA CONVERSA =================
-print(f"Avatar da sua namorada IA: {AVATAR_URL}\n")
-print("Você pode abrir o link acima para ver seu avatar.\n")
+print("Avatar da sua namorada IA:")
+print(AVATAR_URL)
+print("Você pode abrir o link acima no navegador para ver o avatar.\n")
+
+webbrowser.open(AVATAR_URL)  # abre automaticamente o avatar
 
 while True:
     user_input = input("Você: ")
@@ -55,4 +27,3 @@ while True:
 
     ai_response = ask_ai(user_input)
     print(f"IA: {ai_response}\n")
-    speak(ai_response)
