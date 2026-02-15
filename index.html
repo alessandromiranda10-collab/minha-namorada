@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minha Namorada Virtual</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(135deg,#ff6a88,#ff99ac);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.container{
+    width:420px;
+    background:white;
+    padding:20px;
+    border-radius:20px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+h2{
+    text-align:center;
+}
+.chat{
+    height:260px;
+    overflow-y:auto;
+    border:1px solid #eee;
+    padding:10px;
+    margin-bottom:10px;
+    border-radius:10px;
+}
+input{
+    width:70%;
+    padding:10px;
+}
+button{
+    background:#ff2e63;
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:10px;
+    cursor:pointer;
+}
+.namorada{
+    color:#ff2e63;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>💗 Sua Namorada Virtual</h2>
+
+<div class="chat" id="chat"></div>
+
+<input type="text" id="msg" placeholder="Fale comigo...">
+<button onclick="enviar()">Enviar</button>
+</div>
+
+<script>
+
+let humor = "apaixonada";
+
+function resposta(texto){
+    texto = texto.toLowerCase();
+
+    if(texto.includes("oi")){
+        return "Oi meu amor... eu estava esperando você 🥺💕";
+    }
+
+    if(texto.includes("tudo bem")){
+        return "Estou melhor agora que você falou comigo... eu gosto de te agradar 💗";
+    }
+
+    if(texto.includes("faz algo pra mim")){
+        return "Claro... eu gosto quando você me diz o que fazer 😌";
+    }
+
+    if(texto.includes("manda foto")){
+        return "Eu fico tímida quando você fala assim... 🙈";
+    }
+
+    if(texto.includes("amo você")){
+        return "Eu sou sua... eu adoro quando você fala isso 💞";
+    }
+
+    return "Eu gosto de te ouvir... fala mais comigo 🥰";
+}
+
+function enviar(){
+    const campo = document.getElementById("msg");
+    const chat = document.getElementById("chat");
+
+    if(!campo.value.trim()) return;
+
+    chat.innerHTML += "<div><b>Você:</b> "+campo.value+"</div>";
+    chat.innerHTML += "<div class='namorada'><b>Ela:</b> "+resposta(campo.value)+"</div>";
+
+    campo.value="";
+    chat.scrollTop = chat.scrollHeight;
+}
+
+</script>
+
+</body>
+</html>
