@@ -12,4 +12,48 @@ AVATAR_URL = "https://raw.githubusercontent.com/username/repo/main/avatar.png"
 def ask_ai(prompt):
     headers = {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
     payload = {"inputs": prompt}
-    response = requests
+    response = requests.post(
+        f"https://api-inference.huggingface.co/models/{MODEL_CHAT}",
+        headers=headers,
+        json=payload
+    )
+    result = response.json()
+    if "error" in result:
+        return "Ops, o modelo não respondeu. Tente novamente."
+    return result[0]['generated_text'].replace(prompt, "").strip()
+
+# ================= FUNÇÃO TTS =================
+def speak(text):
+    headers = {"Authorization": f"Bearer {HUGGINGFACE_TOKEN}"}
+    payload = {"inputs": text}
+    response = requests.post(
+        f"https://api-inference.huggingface.co/models/{MODEL_TTS}",
+        headers=headers,
+        json=payload
+    )
+    if response.status_code != 200:
+        print("TTS falhou, mas você pode continuar a conversa apenas por texto.")
+        return
+
+    # Salva o áudio temporariamente e abre no navegador
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
+        f.write(response.content)
+        webbrowser.open(f.name)
+
+# ================= INÍCIO DA CONVERSA =================
+print(f"Avatar da sua namorada IA: {AVATAR_URL}")
+webbrowser.open(AVATAR_URL)
+
+print("\nDigite 'sair' para encerrar a conversa.\n")
+
+while True:
+    user_input = input("Você: ")
+    if user_input.lower() in ["sair", "exit", "quit"]:
+        print("Encerrando a conversa...")
+        break
+
+    ai_response = ask_ai(user_input)
+    print(f"IA: {ai_response}\n")
+    speak(ai_response)
+
+
